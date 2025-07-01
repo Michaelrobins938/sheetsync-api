@@ -1,116 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ghost Terminal - SheetsSync</title>
-    <link rel="stylesheet" href="css/terminal.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
-</head>
-<body>
-    <div class="terminal-container">
-        <!-- Terminal Header -->
-        <div class="terminal-header">
-            <div class="terminal-controls">
-                <span class="control close"></span>
-                <span class="control minimize"></span>
-                <span class="control maximize"></span>
-            </div>
-            <div class="terminal-title">ghost@terminal:~$</div>
-        </div>
+<!-- Header Component -->
+<div class="header">
+  <h1 class="logo"><img src="ghost-logo.svg" alt="GhostForm"></h1>
+  <p class="tagline">Phantom Form Data Capture</p>
+</div>
 
-        <!-- Terminal Body -->
-        <div class="terminal-body">
-            <div class="terminal-output" id="output">
-                <div class="boot-sequence">
-                    <div class="boot-line">Initializing SheetsSync Protocol...</div>
-                    <div class="boot-line">Connecting to Google Sheets API...</div>
-                    <div class="boot-line">Authentication: <span class="success">VERIFIED</span></div>
-                    <div class="boot-line">Status: <span class="success">ONLINE</span></div>
-                    <div class="boot-line">Ready for data transmission.</div>
-                </div>
-                
-                <div class="prompt-line">
-                    <span class="prompt">ghost@sheetsync:~$</span>
-                    <span class="command">stealth-form --deploy</span>
-                </div>
-            </div>
+<!-- Form Component -->
+<form id="data-capture-form">
+  <div class="form-group">
+    <label for="name">Name</label>
+    <input type="text" id="name" required>
+  </div>
+  <div class="form-group">
+    <label for="age">Age</label>
+    <input type="number" id="age" required>
+  </div>
+  <div class="form-group">
+    <label for="email">Email</label>
+    <input type="email" id="email" required>
+  </div>
+  <button type="submit" class="submit-btn" disabled>Submit</button>
+</form>
 
-            <!-- Stealth Form Module -->
-            <div class="stealth-form-module">
-                <div class="module-header">
-                    <span class="module-indicator">●</span>
-                    <span class="module-title">DATA TRANSMISSION MODULE</span>
-                </div>
-                
-                <form id="stealthForm" class="stealth-form">
-                    <div class="form-grid">
-                        <div class="input-group">
-                            <label class="input-label">TARGET_NAME</label>
-                            <input type="text" id="name" name="name" class="terminal-input" placeholder="Enter designation..." required>
-                            <div class="input-underline"></div>
-                        </div>
-                        
-                        <div class="input-group">
-                            <label class="input-label">AGE_VALUE</label>
-                            <input type="number" id="age" name="age" class="terminal-input" placeholder="Enter numeric value..." required>
-                            <div class="input-underline"></div>
-                        </div>
-                    </div>
-                    
-                    <button type="submit" class="stealth-button" id="transmitBtn">
-                        <span class="btn-text">
-                            <span class="btn-icon">⚡</span>
-                            TRANSMIT TO SHEETS
-                        </span>
-                        <div class="btn-loading">
-                            <div class="loading-dots">
-                                <span></span><span></span><span></span>
-                            </div>
-                            TRANSMITTING...
-                        </div>
-                    </button>
-                </form>
-            </div>
+<!-- Status Console Component -->
+<div class="status-console">
+  <div class="status-indicator">
+    <div class="status-icon">⏳</div>
+    <div id="api-response"></div>
+    <button class="reset-btn">Reset</button>
+  </div>
+</div>
 
-            <!-- Status Display -->
-            <div class="status-module" id="statusModule">
-                <div class="status-header">
-                    <span class="status-indicator"></span>
-                    <span class="status-text">TRANSMISSION LOG</span>
-                </div>
-                <div class="status-content" id="statusContent"></div>
-            </div>
-
-            <!-- Recent Operations */
-            <div class="operations-module" id="operationsModule">
-                <div class="operations-header">
-                    <span class="ops-indicator">◉</span>
-                    <span class="ops-title">RECENT OPERATIONS</span>
-                </div>
-                <div class="operations-list" id="operationsList"></div>
-                <div class="operations-footer">
-                    <a href="https://docs.google.com/spreadsheets/d/1XzqsHkpsE3SvD6taZqIeTJWHZA_dh34W-9IjYNo1gnY/edit" 
-                       target="_blank" class="sheet-link">
-                        → ACCESS MAIN DATABASE
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Terminal Footer -->
-        <div class="terminal-footer">
-            <div class="footer-stats">
-                <span class="stat">UPTIME: <span id="uptime">00:00</span></span>
-                <span class="stat">OPS: <span id="operations">0</span></span>
-                <span class="stat">STATUS: <span class="success">SECURE</span></span>
-            </div>
-        </div>
-    </div>
-
-    <script src="js/components.js"></script>
-    <script src="js/terminal.js"></script>
-</body>
-</html>
+<!-- Footer Component -->
+<div class="footer">
+  <p class="powered-by">Powered by <a href="https://sheetsync-api.vercel.app">Sheetsync</a></p>
+</div>
