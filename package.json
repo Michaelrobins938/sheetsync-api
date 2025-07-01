@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/Michaelrobins938/sheetsync-api#readme",
   "dependencies": {
-    "dotenv": "^17.0.0",
-    "google-spreadsheet": "^4.1.4"
+    "dotenv": "17.0.0",
+    "google-spreadsheet": "4.1.4"
   }
 }
