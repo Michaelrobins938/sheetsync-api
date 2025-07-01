@@ -1,49 +1,49 @@
 cat > api/index.js << 'EOF'
-const { GoogleSpreadsheet } = require('google-spreadsheet');
+import { GoogleSpreadsheet } from 'google-spreadsheet';
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   try {
-    if (!process.env.SERVICE_ACCOUNT_KEY) {
-      return res.status(500).json({ error: 'SERVICE_ACCOUNT_KEY environment variable not found' });
+    // Only allow POST requests
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method not allowed' });
     }
+
+    // Get data from request body
+    const { name, age } = req.body;
     
+    if (!name || !age) {
+      return res.status(400).json({ error: 'Name and age are required' });
+    }
+
+    // Parse the service account key from environment variable
     const serviceAccountKey = JSON.parse(process.env.SERVICE_ACCOUNT_KEY);
     
-    // 🧾 Your real Google Sheet ID (yes, we're live)
+    // Initialize the sheet
     const SHEET_ID = '1XzqsHkpsE3SvD6taZqIeTJWHZA_dh34W-9IjYNo1gnY';
-    
     const doc = new GoogleSpreadsheet(SHEET_ID);
     
-    console.log('useServiceAccountAuth exists:', typeof doc.useServiceAccountAuth);
-    if (typeof doc.useServiceAccountAuth !== 'function') {
-      return res.status(500).json({ 
-        error: `useServiceAccountAuth is not a function. Type: ${typeof doc.useServiceAccountAuth}`,
-        availableMethods: Object.getOwnPropertyNames(Object.getPrototypeOf(doc))
-          .filter(name => typeof doc[name] === 'function')
-      });
-    }
-    
+    // Authenticate
     await doc.useServiceAccountAuth(serviceAccountKey);
     await doc.loadInfo();
     
+    // Get the first sheet
     const sheet = doc.sheetsByIndex[0];
     
-    await sheet.addRow({
-      'timestamp': new Date().toISOString(),
-      'message': 'API test successful'
+    // Add the row with dynamic data
+    const row = await sheet.addRow({
+      name: name,
+      age: age
     });
     
-    res.status(200).json({
+    res.json({
       success: true,
-      sheetTitle: doc.title,
-      message: 'Row added successfully'
+      message: 'Data added to Google Sheet successfully!',
+      rowData: row._rawData
     });
   } catch (error) {
-    console.error('Full error:', error);
     res.status(500).json({
       error: error.message,
-      type: error.constructor.name,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      stack: error.stack
     });
   }
 }
