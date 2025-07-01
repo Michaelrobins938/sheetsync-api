@@ -1,25 +1,17 @@
 cat > api/debug.js << 'EOF'
-const { GoogleSpreadsheet } = require('google-spreadsheet');
-
 module.exports = async function handler(req, res) {
   try {
+    const { GoogleSpreadsheet } = require('google-spreadsheet');
+    
     const hasEnvVar = !!process.env.SERVICE_ACCOUNT_KEY;
     const envVarLength = process.env.SERVICE_ACCOUNT_KEY?.length || 0;
     
-    // Test if GoogleSpreadsheet constructor works
-    let constructorWorks = false;
-    let hasUseServiceAccountAuth = false;
-    
-    try {
-      const testDoc = new GoogleSpreadsheet('test-id');
-      constructorWorks = true;
-      hasUseServiceAccountAuth = typeof testDoc.useServiceAccountAuth === 'function';
-    } catch (e) {
-      constructorWorks = false;
-    }
+    // Check methods without creating instance
+    const prototype = GoogleSpreadsheet.prototype;
+    const hasUseServiceAccountAuth = typeof prototype.useServiceAccountAuth === 'function';
     
     res.json({
-      constructorWorks,
+      constructorWorks: typeof GoogleSpreadsheet === 'function',
       hasUseServiceAccountAuth,
       hasServiceAccountKey: hasEnvVar,
       serviceAccountKeyLength: envVarLength,
