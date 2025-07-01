@@ -1,9 +1,8 @@
-// /api/debug.js
-export default function handler(req, res) {
+cat > api/debug.js << 'EOF'
+const { GoogleSpreadsheet } = require('google-spreadsheet');
+
+module.exports = async function handler(req, res) {
   try {
-    // Don't try to access package.json directly - use alternative methods
-    const { GoogleSpreadsheet } = require('google-spreadsheet');
-    
     const hasEnvVar = !!process.env.SERVICE_ACCOUNT_KEY;
     const envVarLength = process.env.SERVICE_ACCOUNT_KEY?.length || 0;
     
@@ -25,7 +24,6 @@ export default function handler(req, res) {
       hasServiceAccountKey: hasEnvVar,
       serviceAccountKeyLength: envVarLength,
       nodeVersion: process.version,
-      // Try to parse env var
       serviceAccountKeyValid: hasEnvVar ? (() => {
         try {
           JSON.parse(process.env.SERVICE_ACCOUNT_KEY);
@@ -36,9 +34,10 @@ export default function handler(req, res) {
       })() : false
     });
   } catch (error) {
-    res.json({ 
+    res.status(500).json({ 
       error: error.message,
       stack: error.stack 
     });
   }
 }
+EOF
