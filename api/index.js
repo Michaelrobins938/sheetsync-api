@@ -3,8 +3,6 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const serviceAccountKey = JSON.parse(process.env.SERVICE_ACCOUNT_KEY);
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
@@ -17,13 +15,18 @@ export default async function handler(req, res) {
   }
 
   try {
+    const serviceAccountKey = JSON.parse(process.env.SERVICE_ACCOUNT_KEY);
+
     const doc = new GoogleSpreadsheet(sheet_id);
-    await doc.useServiceAccountAuth(serviceAccountKey);
+    await doc.useServiceAccountAuth({
+      client_email: serviceAccountKey.client_email,
+      private_key: serviceAccountKey.private_key,
+    });
+
     await doc.loadInfo();
 
     const sheetTitle = range.split('!')[0];
     const sheet = doc.sheetsByTitle[sheetTitle];
-
     if (!sheet) return res.status(404).json({ error: 'Sheet not found' });
 
     if (mode === 'read') {
@@ -37,7 +40,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Invalid mode' });
     }
   } catch (err) {
-    console.error(err);
+    console.error("🔥 Server exploded:", err);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
