@@ -40,7 +40,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Invalid mode' });
     }
   } catch (err) {
-    console.error("🔥 Server exploded:", err);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    console.error("🔥 Server exploded:", err.message);
+    console.error(err.stack);
+    return res.status(500).json({ error: err.message });
   }
 }
