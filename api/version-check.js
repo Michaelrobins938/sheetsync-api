@@ -1,12 +1,12 @@
 cat > api/version-check.js << 'EOF'
 module.exports = async function handler(req, res) {
   try {
-    // Check what's actually installed without triggering constructor
+    // Check what's actually installed without triggering any getters
     const fs = require('fs');
     const path = require('path');
     
     let packageInfo = 'unable to read';
-    let actualMethods = [];
+    let methodsList = [];
     
     try {
       // Get version from package.json
@@ -19,14 +19,17 @@ module.exports = async function handler(req, res) {
         packageInfo = pkg.version;
       }
       
-      // Try to get methods safely
+      // Safely check methods without triggering getters
       const { GoogleSpreadsheet } = require('google-spreadsheet');
       
-      // Check static methods and properties on the constructor
-      const constructorProps = Object.getOwnPropertyNames(GoogleSpreadsheet);
-      const prototypeProps = Object.getOwnPropertyNames(GoogleSpreadsheet.prototype || {});
+      // Get method names safely using descriptors to avoid getters
+      const prototype = GoogleSpreadsheet.prototype;
+      const descriptors = Object.getOwnPropertyDescriptors(prototype);
       
-      actualMethods = [...constructorProps, ...prototypeProps];
+      methodsList = Object.keys(descriptors).filter(key => {
+        const descriptor = descriptors[key];
+        return descriptor.value && typeof descriptor.value === 'function';
+      });
       
     } catch (e) {
       packageInfo = `error reading: ${e.message}`;
@@ -34,11 +37,12 @@ module.exports = async function handler(req, res) {
     
     res.json({
       installedVersion: packageInfo,
-      allProperties: actualMethods,
-      hasUseServiceAccountAuth: actualMethods.includes('useServiceAccountAuth'),
-      hasAuth: actualMethods.includes('auth'),
+      availableMethods: methodsList,
+      hasUseServiceAccountAuth: methodsList.includes('useServiceAccountAuth'),
+      hasServiceAccountAuth: methodsList.includes('serviceAccountAuth'),
+      hasAuth: methodsList.includes('auth'),
       nodeVersion: process.version,
-      packageResolvePath: require.resolve('google-spreadsheet')
+      packagePath: require.resolve('google-spreadsheet')
     });
   } catch (error) {
     res.status(500).json({ 
