@@ -1,16 +1,15 @@
-# Create the version-check endpoint
 cat > api/version-check.js << 'EOF'
-// /api/version-check.js
-export default function handler(req, res) {
+const { GoogleSpreadsheet } = require('google-spreadsheet');
+
+module.exports = async function handler(req, res) {
   try {
     // Get all available methods/properties
-    const { GoogleSpreadsheet } = require('google-spreadsheet');
     const testDoc = new GoogleSpreadsheet('test');
     
     const methods = Object.getOwnPropertyNames(Object.getPrototypeOf(testDoc))
       .filter(name => typeof testDoc[name] === 'function');
     
-    // Check what's in node_modules (alternative approach)
+    // Check what's in node_modules
     const fs = require('fs');
     const path = require('path');
     
@@ -33,10 +32,11 @@ export default function handler(req, res) {
       availableMethods: methods,
       hasUseServiceAccountAuth: methods.includes('useServiceAccountAuth'),
       hasServiceAccountAuth: methods.includes('serviceAccountAuth'),
-      hasAuth: methods.includes('auth')
+      hasAuth: methods.includes('auth'),
+      nodeVersion: process.version
     });
   } catch (error) {
-    res.json({ 
+    res.status(500).json({ 
       error: error.message,
       stack: error.stack 
     });
