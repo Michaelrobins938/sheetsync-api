@@ -1,4 +1,4 @@
-# Create the test files that are missing
+# Create the test files
 cat > api/test-auth-only.js << 'EOF'
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 
@@ -52,3 +52,7 @@ module.exports = async function handler(req, res) {
 }
 EOF
 
+# Verify the files were created
+ls -la api/
+
+# You should see 5 files now instead of 3
