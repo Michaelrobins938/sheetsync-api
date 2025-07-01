@@ -1,3 +1,5 @@
+# Create the version-check endpoint
+cat > api/version-check.js << 'EOF'
 // /api/version-check.js
 export default function handler(req, res) {
   try {
@@ -30,8 +32,8 @@ export default function handler(req, res) {
       installedVersion: packageInfo,
       availableMethods: methods,
       hasUseServiceAccountAuth: methods.includes('useServiceAccountAuth'),
-      hasServiceAccountAuth: methods.includes('serviceAccountAuth'), // older versions
-      hasAuth: methods.includes('auth') // check for other auth methods
+      hasServiceAccountAuth: methods.includes('serviceAccountAuth'),
+      hasAuth: methods.includes('auth')
     });
   } catch (error) {
     res.json({ 
@@ -40,3 +42,4 @@ export default function handler(req, res) {
     });
   }
 }
+EOF
