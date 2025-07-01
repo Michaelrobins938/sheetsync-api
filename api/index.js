@@ -1,47 +1,45 @@
-import { GoogleSpreadsheet } from 'google-spreadsheet';
-import dotenv from 'dotenv';
-
-dotenv.config();
+// /api/index.js
+const { GoogleSpreadsheet } = require('google-spreadsheet');
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
-
-  const { sheet_id, range, mode, data } = req.body;
-
-  if (!sheet_id || !range || !mode) {
-    return res.status(400).json({ error: 'Missing required parameters' });
-  }
-
   try {
+    if (!process.env.SERVICE_ACCOUNT_KEY) {
+      throw new Error('SERVICE_ACCOUNT_KEY environment variable not found');
+    }
+
     const serviceAccountKey = JSON.parse(process.env.SERVICE_ACCOUNT_KEY);
 
-    const doc = new GoogleSpreadsheet(sheet_id);
-    await doc.useServiceAccountAuth({
-      client_email: serviceAccountKey.client_email,
-      private_key: serviceAccountKey.private_key,
-    });
+    // 🧾 Your real Google Sheet ID (yes, we’re live)
+    const SHEET_ID = '1XzqsHkpsE3SvD6taZqIeTJWHZA_dh34W-9IjYNo1gnY';
 
+    const doc = new GoogleSpreadsheet(SHEET_ID);
+
+    console.log('useServiceAccountAuth exists:', typeof doc.useServiceAccountAuth);
+    if (typeof doc.useServiceAccountAuth !== 'function') {
+      throw new Error(`useServiceAccountAuth is not a function. Type: ${typeof doc.useServiceAccountAuth}`);
+    }
+
+    await doc.useServiceAccountAuth(serviceAccountKey);
     await doc.loadInfo();
 
-    const sheetTitle = range.split('!')[0];
-    const sheet = doc.sheetsByTitle[sheetTitle];
-    if (!sheet) return res.status(404).json({ error: 'Sheet not found' });
+    const sheet = doc.sheetsByIndex[0];
 
-    if (mode === 'read') {
-      const rows = await sheet.getRows();
-      return res.status(200).json(rows.map(r => r._rawData));
-    } else if (mode === 'write') {
-      if (!data) return res.status(400).json({ error: 'Data required for write' });
-      await sheet.addRows(data);
-      return res.status(200).json({ message: 'Data written successfully' });
-    } else {
-      return res.status(400).json({ error: 'Invalid mode' });
-    }
-  } catch (err) {
-    console.error("🔥 Server exploded:", err.message);
-    console.error(err.stack);
-    return res.status(500).json({ error: err.message });
+    await sheet.addRow({
+      'timestamp': new Date().toISOString(),
+      'message': 'API test successful'
+    });
+
+    res.status(200).json({
+      success: true,
+      sheetTitle: doc.title,
+      message: 'Row added successfully'
+    });
+  } catch (error) {
+    console.error('Full error:', error);
+    res.status(500).json({
+      error: error.message,
+      type: error.constructor.name,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 }
