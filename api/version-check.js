@@ -3,11 +3,10 @@ const { GoogleSpreadsheet } = require('google-spreadsheet');
 
 module.exports = async function handler(req, res) {
   try {
-    // Get all available methods/properties
-    const testDoc = new GoogleSpreadsheet('test');
-    
-    const methods = Object.getOwnPropertyNames(Object.getPrototypeOf(testDoc))
-      .filter(name => typeof testDoc[name] === 'function');
+    // Don't create an instance - check the prototype directly
+    const prototype = GoogleSpreadsheet.prototype;
+    const methods = Object.getOwnPropertyNames(prototype)
+      .filter(name => typeof prototype[name] === 'function');
     
     // Check what's in node_modules
     const fs = require('fs');
@@ -33,7 +32,8 @@ module.exports = async function handler(req, res) {
       hasUseServiceAccountAuth: methods.includes('useServiceAccountAuth'),
       hasServiceAccountAuth: methods.includes('serviceAccountAuth'),
       hasAuth: methods.includes('auth'),
-      nodeVersion: process.version
+      nodeVersion: process.version,
+      constructorAvailable: typeof GoogleSpreadsheet === 'function'
     });
   } catch (error) {
     res.status(500).json({ 
