@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SheetsSync - Data Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 500;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .recent-data {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .recent-data h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.2rem;
+        }
+
+        .data-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .view-sheet-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .view-sheet-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .form-container {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 SheetsSync</h1>
+            <p>Send data directly to Google Sheets</p>
+        </div>
+        
+        <div class="form-container">
+            <form id="dataForm">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" required placeholder="Enter full name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="age">Age</label>
+                    <input type="number" id="age" name="age" required placeholder="Enter age" min="1" max="120">
+                </div>
+                
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span class="btn-text">💾 Save to Google Sheets</span>
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <span>Saving...</span>
+                    </div>
+                </button>
+            </form>
+            
+            <div class="message" id="message"></div>
+            
+            <div class="recent-data" id="recentData" style="display: none;">
+                <h3>📊 Recent Submissions</h3>
+                <div id="dataList"></div>
+                <a href="https://docs.google.com/spreadsheets/d/1XzqsHkpsE3SvD6taZqIeTJWHZA_dh34W-9IjYNo1gnY/edit" 
+                   target="_blank" class="view-sheet-btn">
+                    📋 View Full Google Sheet
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://sheetsync-api.vercel.app/api/index';
+        const form = document.getElementById('dataForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const message = document.getElementById('message');
+        const recentData = document.getElementById('recentData');
+        const dataList = document.getElementById('dataList');
+        const btnText = submitBtn.querySelector('.btn-text');
+        const loading = submitBtn.querySelector('.loading');
+
+        let recentSubmissions = JSON.parse(localStorage.getItem('recentSubmissions') || '[]');
+
+        displayRecentSubmissions();
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            const data = {
+                name: formData.get('name').trim(),
+                age: formData.get('age')
+            };
+
+            if (!data.name || !data.age) {
+                showMessage('Please fill in all fields', 'error');
+                return;
+            }
+
+            setLoading(true);
+            hideMessage();
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    showMessage(`✅ Success! ${data.name} (${data.age}) added to Google Sheets`, 'success');
+                    addToRecentSubmissions(data);
+                    form.reset();
+                } else {
+                    throw new Error(result.error || 'Failed to save data');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage(`❌ Error: ${error.message}`, 'error');
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        function setLoading(isLoading) {
+            submitBtn.disabled = isLoading;
+            if (isLoading) {
+                btnText.style.display = 'none';
+                loading.style.display = 'flex';
+            } else {
+                btnText.style.display = 'block';
+                loading.style.display = 'none';
+            }
+        }
+
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.className = `message ${type}`;
+            message.classList.add('show');
+        }
+
+        function hideMessage() {
+            message.classList.remove('show');
+        }
+
+        function addToRecentSubmissions(data) {
+            const submission = {
+                ...data,
+                timestamp: new Date().toLocaleString()
+            };
+            
+            recentSubmissions.unshift(submission);
+            if (recentSubmissions.length > 5) {
+                recentSubmissions = recentSubmissions.slice(0, 5);
+            }
+            
+            localStorage.setItem('recentSubmissions', JSON.stringify(recentSubmissions));
+            displayRecentSubmissions();
+        }
+
+        function displayRecentSubmissions() {
+            if (recentSubmissions.length === 0) {
+                recentData.style.display = 'none';
+                return;
+            }
+
+            recentData.style.display = 'block';
+            dataList.innerHTML = recentSubmissions
+                .map(item => `
+                    <div class="data-item">
+                        <div>
+                            <strong>${item.name}</strong> - ${item.age} years old
+                        </div>
+                        <small>${item.timestamp}</small>
+                    </div>
+                `).join('');
+        }
+    </script>
+</body>
+</html>
